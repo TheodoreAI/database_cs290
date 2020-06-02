@@ -37,9 +37,9 @@ const makeTableQuery = `CREATE TABLE workout(
 // unit of 0 is lbs, unit of 1 is kgs
 // make a function to resuse in the routes
 
-app.get('/', (req, res) => {
-    res.render('index');
-})
+// app.get('/', (req, res) => {
+//     res.render('index');
+// })
 
 const getAllData = () => {
     mysql.pool.query(getAllQuery, (res, err, rows, fields) => {
@@ -75,8 +75,7 @@ app.post('/',  (req, res, next) => {
         [name, reps, weight, unit, date], 
         (err, result) =>{
         if (err) {
-            next(err);
-            return;
+           return next(err);     
         }
         // make another query inside the callback fun
         getAllData();

@@ -1,7 +1,7 @@
 // beware of the format that we get the date back from mysql, format it using the value: yyyy:MM:DD
 
 // defines the route where the requests are going:
-const homeUrl = `http://flip1.engr.oregonstate.edu:1975/`;
+const homeUrl = 'http://flip1.engr.oregonstate.edu:1975/';
 // make form
 var form = document.createElement('form');
 var name1 = document.createElement("input");
@@ -80,43 +80,56 @@ var form = document.getElementById('addForm');
 form.addEventListener('submit', function(event){
     var req = new XMLHttpRequest();
     // there might be something that needs to go here for the json.stringfy(etc)
-    req.open('post', homeUrl, true);
+    var payload = {id: null, name: null, reps: null, weight: null, unit: null, date: null};
+    payload.id = 
+    req.addEventListener('progress', updateProgress);
+    req.addEventListener('error', transerFail)
+    req.open('POST', homeUrl, true);
     req.setRequestHeader('Content-Type', 'application/json');
     req.addEventListener('load', function () {
         if (req.status >= 200 && req.status < 400){
-            var response = JSON.parse(req.responseText);
-            document.getElementById('nameID').textContent = response.name;
+            console.log("success in posting to the database!")
         }else{
             console.log("Error in the network request: " + req.statusText);
         }});
-   
+    function updateProgress(clientEvent) {
+        if (clientEvent.lengthComputable) {
+            console.log("Still processing");
+        } else {
+            console.log('Unable to compute progress info');
+        }
+    }
+
+    function transerFail(evt) {
+        console.log("An error occured during transeferring.");
+    }
+    
     event.preventDefault();
 })
 
 const makeTable = (allRows) => {
+    var headers = ['name', 'reps', 'weight', 'unit', 'date'];
     // makes the table
     // using the data from the database
-    var table = createElement('table');
+    var table = document.createElement('table');
     table.setAttribute('id', 'workoutTable');
     // appends the headers
-    table.appendChild(makeHeaderRow);
-    document.body.appendChild(table);
     
+    var tr = table.insertRow(-1);
     // add the table data cells each with the data for the specific id
     // add the buttons
 
+     // remember that the the let lets you make a new lexical scope chained up to the previous scope
+    for (let i = 0; i < headers.length; i++) {
+         var th = createElement('th');
+         var thText = createTextNode(headers[i]);
+         th.appendChild(thText);
+         tr.appendChild(th);
+    }
+
+    document.body.appendChild(table);
 };
 
-const makeHeaderRow = () => {
-    var headers = ['name', 'reps', 'weight', 'unit', 'date'];
-   
-  // remember that the the let lets you make a new lexical scope chained up to the previous scope
-    for (let i = 0; i < headers.length; i++){
-        var th = createElement('th');
-        var thText = createTextNode(headers[i]);
-        th.appendChild(thText);
-    } return th
-};
 
 const makeRow = (rowData, headerRow = false) => {
     var tableEmpty = document.getElementById('workoutTable');
@@ -174,18 +187,37 @@ const deleteTable = () => {
 const getData = async() => {
     // make a get request to the db
     var req = new XMLHttpRequest();
+    req.addEventListener("progress", updateProgress);
+    req.addEventListener('error', transerFail);
+
     req.open('get', homeUrl, true);
     req.addEventListener('load', function () {
         if (req.status >= 200 && req.status < 400) {
-            var response = JSON.parse(req.responseText);
-            document.getElementById('nameID').textContent = response.name;
+           console.log('There was a successful GET request to the DB.')
         } else {
             console.log("Error in the network request: " + req.statusText);
         }
+        event.preventDefault();
     });
+    req.send();
+    
+    function updateProgress(clientEvent){
+        if (clientEvent.lengthComputable) {
+            console.log("Still processing");
+        }else{
+            console.log('Unable to compute progress info');
+        }
+    }
+    function transerFail(evt){
+        console.log("An error occured during transeferring.");
+    }
+
     // passing a JSON object to the table to build the rows
-    JSON.parse(res.responseText);
-    event.preventDefault();
+    req.onload = function () {
+        let responseObj = req.response;
+        alert(responseObj.message); // Hello, world!
+    };
+
 }
 
 // submit the add form and rebuild the table
@@ -203,41 +235,41 @@ const getData = async() => {
 
 // };
 
-(async () => {
-    let tblData = await getData();
-    makeTable(tblData);
-})();
+// (async () => {
+//     let tblData = await getData();
+//     makeTable(tblData);
+// })();
 
 // form action goes to the path of of app.js
 
 
-table.addEventListener('click', (event)=> {
-    let target = event.target;
+// table.addEventListener('click', (event)=> {
+//     let target = event.target;
     
 
-    // if its an update button send a PUT request to the server
+//     // if its an update button send a PUT request to the server
 
-    // if its a delete button then send a DELETE request to the server
-
-
-    // if its a POST button then send a POST request to the server
+//     // if its a delete button then send a DELETE request to the server
 
 
+//     // if its a POST button then send a POST request to the server
 
 
-    // if delete, deletes it then it makes it again
-
-    // Makes the table again
-});
-
-// handlers for each of the event listeners: sends the stuff to the table and callbacks
 
 
-// get the attributes to update: workout, reps, weight, unit, date
-const onUpdate = () => {}
+//     // if delete, deletes it then it makes it again
 
-// get the ID and delete that row
-const onDelete = () => {}
+//     // Makes the table again
+// });
+
+// // handlers for each of the event listeners: sends the stuff to the table and callbacks
+
+
+// // get the attributes to update: workout, reps, weight, unit, date
+// const onUpdate = () => {}
+
+// // get the ID and delete that row
+// const onDelete = () => {}
 
 
 
