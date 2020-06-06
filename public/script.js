@@ -1,277 +1,232 @@
-// beware of the format that we get the date back from mysql, format it using the value: yyyy:MM:DD
+const homeUrl = "http://flip1.engr.oregonstate.edu:1969/";
 
-// defines the route where the requests are going:
-const homeUrl = 'http://flip1.engr.oregonstate.edu:1975/';
-// make form
-var form = document.createElement('form');
-var name1 = document.createElement("input");
+// I am going to start with an empty database and add things
+// make a table if there is stuff in there already
 
-var reps = document.createElement('input');
-var weight = document.createElement('input');
-var unit1 = document.createElement('input');
-var unit2 = document.createElement('input');
-var date = document.createElement('input');
-var submit = document.createElement('input');
+const makeInput = (type, name, value) => {
 
-var Kgs = document.createTextNode("Kgs");
-var lbs = document.createTextNode('Lbs');
-// name
-form.appendChild(name1);
-
-name1.setAttribute('name', "name");
-name1.setAttribute('type', 'text');
-name1.setAttribute('id', 'nameID')
-
-// reps
-form.appendChild(reps);
-reps.setAttribute('name', 'reps');
-reps.setAttribute('type', 'number');
-reps.setAttribute('id', 'repsID')
-
-// weight
-form.appendChild(weight);
-weight.setAttribute('name', 'weight');
-weight.setAttribute('type', 'number');
-weight.setAttribute('id', 'weightID');
-
-// unit
-
-// labels
-
-var nameLabel = document.createElement('label');
-nameLabel.setAttribute('for', 'kgs');
-nameLabel.appendChild(Kgs);
-
-unit1.setAttribute('name', 'unit');
-unit1.setAttribute('type', 'radio');
-unit1.setAttribute('value', '0');
-unit1.setAttribute('id', 'kgsID');
-nameLabel.appendChild(unit1)
-form.appendChild(nameLabel);
+}
+// the reset-table button doesn't erase the data 
+var resetButton = document.createElement('button');
+resetButton.innerHTML = 'Reset-Table';
+resetButton.setAttribute('id', 'resetButton');
+document.body.appendChild(resetButton)
 
 
-var nameLabel1 = document.createElement('label');
-nameLabel1.setAttribute('for', 'lbs');
-nameLabel1.appendChild(lbs);
-nameLabel1.appendChild(unit2)
-unit2.setAttribute('name', 'unit');
-unit2.setAttribute('type', 'radio');
-unit2.setAttribute('value', '1');
-unit2.setAttribute('id', 'lbsID')
-form.appendChild(nameLabel1);
-
-// date
-form.appendChild(date);
-date.setAttribute('name', 'date');
-date.setAttribute('type', 'date');
-date.setAttribute('id', 'dateID');
-
-form.appendChild(submit);
-submit.setAttribute('value', 'submit');
-submit.setAttribute('type', 'submit');
-
-form.setAttribute('method', 'POST');
-form.setAttribute('action', '/');
-form.setAttribute('id', 'addForm');
-document.body.appendChild(form);
-
-
-var form = document.getElementById('addForm');
-form.addEventListener('submit', function(event){
+document.getElementById('resetButton').addEventListener('click', function (event) {
     var req = new XMLHttpRequest();
-    // there might be something that needs to go here for the json.stringfy(etc)
-    var payload = {id: null, name: null, reps: null, weight: null, unit: null, date: null};
-    payload.id = 
-    req.addEventListener('progress', updateProgress);
-    req.addEventListener('error', transerFail)
+    req.open('GET', homeUrl + 'reset-table', true);
+    req.setRequestHeader('Content-Type', 'application/json');
+    req.addEventListener('load', function () {
+        if (req.status >= 200 && req.status < 400) {
+            alert('This is working');
+            return;
+        }
+    })
+    req.send();
+})
+
+
+document.getElementById('addWorkout').addEventListener('click', function (event) {
+    var req = new XMLHttpRequest();
+    let body = {
+        name: null,
+        reps: null,
+        weight: null,
+        unit: null,
+        date: null
+    };
+    body.name = document.getElementById('nameId').value || null;
+    body.reps = document.getElementById('repsId').value || null;
+    body.reps = document.getElementById('repsId').value || null;
+    body.weight = document.getElementById('weightId').value || null;
+    if (document.getElementById('unit0').checked) {
+        body.unit = 0;
+    } else {
+        body.unit = 1;
+    }
+    body.date = document.getElementById('dateId').value || null;
+    // for troubleshooting:
+    if (body.name == null) {
+        alert('There must be an input workout.');
+        event.preventDefault();
+        return;
+    }
+    // make sure that the top code works
     req.open('POST', homeUrl, true);
     req.setRequestHeader('Content-Type', 'application/json');
     req.addEventListener('load', function () {
-        if (req.status >= 200 && req.status < 400){
-            console.log("success in posting to the database!")
-        }else{
-            console.log("Error in the network request: " + req.statusText);
-        }});
-    function updateProgress(clientEvent) {
-        if (clientEvent.lengthComputable) {
-            console.log("Still processing");
-        } else {
-            console.log('Unable to compute progress info');
-        }
-    }
-
-    function transerFail(evt) {
-        console.log("An error occured during transeferring.");
-    }
-    
-    event.preventDefault();
-})
-
-const makeTable = (allRows) => {
-    var headers = ['name', 'reps', 'weight', 'unit', 'date'];
-    // makes the table
-    // using the data from the database
-    var table = document.createElement('table');
-    table.setAttribute('id', 'workoutTable');
-    // appends the headers
-    
-    var tr = table.insertRow(-1);
-    // add the table data cells each with the data for the specific id
-    // add the buttons
-
-     // remember that the the let lets you make a new lexical scope chained up to the previous scope
-    for (let i = 0; i < headers.length; i++) {
-         var th = createElement('th');
-         var thText = createTextNode(headers[i]);
-         th.appendChild(thText);
-         tr.appendChild(th);
-    }
-
-    document.body.appendChild(table);
-};
-
-
-const makeRow = (rowData, headerRow = false) => {
-    var tableEmpty = document.getElementById('workoutTable');
-    var rowLength = tableEmpty.rows.length;
-    var tr = tableEmpty.insertRow(rowLength);
-
-    // double check the closure here
-    for (let i in rowData){
-        var td = createElement('td');
-        var inputTd = createElement('input');
-        td.appendChild(inputTd);
-        td = tr.insertCell(i);
-    }
-};
-
-
-const makeCell = (data) => {
-    // create a table cell and add attributes to the table cell like
-    // class
-};
-
-
-const makeInput = (data) => {
-    // all the values from the row cells
-    // creates the form input
-};
-
-
-const makeBtn = (name, txt)=>{
-
-};
-
-const makeRadioInputs =(name, val) => {
-
-};
-
-const disableInputs = () => {
-
-};
-
-const enableRow = (rowElem) => {
-
-
-    
-};
-const toggleUpdateBtn = (rowElem) => {
-
-};
-
-const deleteTable = () => {
-};
-
-// function to get all the data from the database
-
-const getData = async() => {
-    // make a get request to the db
-    var req = new XMLHttpRequest();
-    req.addEventListener("progress", updateProgress);
-    req.addEventListener('error', transerFail);
-
-    req.open('get', homeUrl, true);
-    req.addEventListener('load', function () {
         if (req.status >= 200 && req.status < 400) {
-           console.log('There was a successful GET request to the DB.')
+            // make the table here
+            // delete if there is a table already
+            if (document.getElementById('workoutTable') != null) {
+                alert("we about to delete some shit")
+                // this has to call a function that deletes 
+                // the table then makes it again
+                // makeBody(JSON.parse(req.responseText), document.getElementById('workoutTable'));
+                deleteNode(JSON.parse(req.responseText));
+            } else {
+                makeTable(JSON.parse(req.responseText));
+                // alert(req.responseText)
+                alert('The request was processed right: add the table');
+            }
+
         } else {
-            console.log("Error in the network request: " + req.statusText);
+            alert('Error in the post request');
         }
-        event.preventDefault();
     });
-    req.send();
-    
-    function updateProgress(clientEvent){
-        if (clientEvent.lengthComputable) {
-            console.log("Still processing");
-        }else{
-            console.log('Unable to compute progress info');
-        }
-    }
-    function transerFail(evt){
-        console.log("An error occured during transeferring.");
-    }
+    req.send(JSON.stringify(body));
+    event.preventDefault();
+});
 
-    // passing a JSON object to the table to build the rows
-    req.onload = function () {
-        let responseObj = req.response;
-        alert(responseObj.message); // Hello, world!
-    };
 
+// deletes the tbody and builds it again, if submit form
+const deleteNode = (array) => {
+    // save the old table node
+    var table = document.getElementById('workoutTable');
+    var oldBody = document.getElementById('bodyId');
+    table.removeChild(oldBody);
+    // makes the table again
+    makeBody(array, table);
 }
 
-// submit the add form and rebuild the table
-// const form = document.querySelector('#addForm').onsubmit = async (event) => {
 
+document.addEventListener('DOMContentLoaded', (event) => {
+    var req = new XMLHttpRequest();
+    var payload = {
+        name: null,
+        reps: null,
+        weight: null,
+        unit: null,
+        date: null
+    }
+    req.open('GET', homeUrl, true);
+    req.setRequestHeader('Content-Type', 'application/json')
+    req.addEventListener('load', function () {
+        if (req.status >= 200 && req.status < 400) {
+            alert('No pasa la data');
+            alert(req.responseText);
+            
+        } else {
+            alert('There is something wrong with the GET' + req.status);
+        }
+    });
+
+    req.onreadystatechange = function () {
+        console.log('Inside the readeystatechange event:' + 
+        req.readyState);
+    }
+    req.send();
+})
+
+
+
+
+
+// document.getElementById('deleteBtn').addEventListener('click'),
+//     function (event) {
+//         // Two jobs: 
+//         // 1. needs to delete the row from client side
+//         // calls the deleteRow function
+//         var row = document.getElementById('rowId');
+//         var tbody = document.getElementById('bodyId');
+//         tbody.removeChild(row);
+//         deleteRow(row, event);
+//     }
+
+
+// const deleteRow = (rowId, event) => {
+//     // 2. delete the data from the database 
+//     var req = new XMLHttpRequest();
+//     payload = {
+//         id: 'rowId'
+//     }
+//     req.open('DELETE', homeUrl, true);
+//     req.setRequestHeader('Content-Type', 'application/json');
+//     req.addEventListener('load', function () {
+//         if (req.status >= 200 && req.status < 400) {
+//             // if the Delete request goes through effectively
+//             makeTable(JSON.parse(req.responseText));
+//         }
+//     });
+//     req.send(JSON.stringify(payload));
+//     event.preventDefault();
+// }
+
+// function makeTable(allRows) {
+//     var headers = ['Name', 'Reps', 'Weight', 'Unit', 'Date'];
+//     // makes the table
+//     // using the data from the database
+//     var table = document.createElement('table');
+//     table.setAttribute('id', 'workoutTable');
+//     // appends the headers
+
+//     var tr = table.insertRow(-1);
+//     // add the table data cells each with the data for the specific id
+//     // add the buttons
+
+//     // remember that the the let lets you make a new lexical scope chained up to the previous scope
+//     for (let i = 0; i < headers.length; i++) {
+//         var th = document.createElement('th');
+//         var thText = document.createTextNode(headers[i]);
+//         th.appendChild(thText);
+//         tr.appendChild(th);
+//     }
+//     makeBody(allRows, table);
 // };
 
-// update or delete a row
-// document.querySelector('#workoutTable').onclick = async (event) => {
 
-// };
+// function makeBody(array, table) {
+//     // This function makes the body of the table:
+//     if (table == null) {
+//         alert("there is something wrong with the table");
+//         return;
+//     }
+//     if (!Array.isArray(array)) {
+//         // alert('This is not an array');
+//     }
+//     var tbody = document.createElement('tbody');
+//     tbody.setAttribute('id', 'bodyId');
+//     for (let element = 0; element < array.length; element++) {
+//         var e = array[element];
+//         (function (ele) {
 
-// // reset the table
-// document.querySelector('#reset-table').onclick = async (event) => {
+//             var row = document.createElement('tr');
+//             var name = document.createElement('td');
+//             var reps = document.createElement('td');
+//             var weight = document.createElement('td');
+//             var unit = document.createElement('td');
+//             var date = document.createElement('td');
 
-// };
+//             var edit = document.createElement('td');
 
-// (async () => {
-//     let tblData = await getData();
-//     makeTable(tblData);
-// })();
+//             var delBtn = document.createElement('button');
+//             delBtn.setAttribute('id', 'deleteBtn');
+//             row.appendChild(delBtn);
+//             delBtn.innerHTML = 'Delete';
 
-// form action goes to the path of of app.js
+//             row.setAttribute('id', ele['id']);
+//             row.appendChild(name);
+//             name.innerHTML = ele["name"];
+//             row.appendChild(reps);
+//             reps.innerHTML = ele['reps'];
+//             row.appendChild(weight);
+//             weight.innerHTML = ele['weight'];
+//             row.appendChild(unit);
+//             if (ele["unit"] == 1) {
+//                 unit.innerHTML = 'lbs';
+//             } else {
+//                 unit.innerHTML = 'kgs';
+//             }
+//             row.appendChild(date);
+//             if (ele['date'] != null) {
+//                 date.innerHTML = ele['date'].substring(0, 10);
+//             }
+//             tbody.appendChild(row);
 
+//         })(e);
+//         table.appendChild(tbody);
+//         document.body.appendChild(table);
 
-// table.addEventListener('click', (event)=> {
-//     let target = event.target;
-    
-
-//     // if its an update button send a PUT request to the server
-
-//     // if its a delete button then send a DELETE request to the server
-
-
-//     // if its a POST button then send a POST request to the server
-
-
-
-
-//     // if delete, deletes it then it makes it again
-
-//     // Makes the table again
-// });
-
-// // handlers for each of the event listeners: sends the stuff to the table and callbacks
-
-
-// // get the attributes to update: workout, reps, weight, unit, date
-// const onUpdate = () => {}
-
-// // get the ID and delete that row
-// const onDelete = () => {}
-
-
-
-
-
+//     }
+// }
