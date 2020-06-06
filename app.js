@@ -1,13 +1,18 @@
 // server starting
 var express = require("express");
 var app = express();
-
+var handlebars = require('express-handlebars').create({defaultLayout: 'main'});
 // passing the mysql from the dbcon.js file
 var mysql = require('./dbcon.js');
 // using CORS since I'm using static html index
 var CORS = require("cors");
 var path = require('path');
 
+// set the engine
+app.engine('handlebars', handlebars.engine);
+app.set('view engine', 'handlebars');
+
+// port stuff and using express on the app
 var port = '1969'
 app.set('port', port)
 app.use(express.json());
@@ -41,7 +46,15 @@ const makeTableQuery = `CREATE TABLE workout(
 
 // This function will return an array of objects 
 // which corresponds to the rows in the database.
-const getAllData = (req, res, next) => {
+
+// show the home page
+app.get('/', (req, res)=>{
+    res.render('home');
+})
+
+
+// collect the data from the database
+function getAllData(req, res, next){
     mysql.pool.query(getAllQuery, (err, rows, fields) => {
         if(err){
             console.log("there was an error"+ err);
@@ -49,26 +62,14 @@ const getAllData = (req, res, next) => {
         }
         // object called rows: rows from db are an array [object1, object2,,..,]
         // sends it back to the client-side
-        alert('it gets here')
+       
         res.type('application/json');
-        console.log(({rows: rows}), "This is the {rows: rows} object.");
         res.send(rows);
     });
 };
-// gets all the rows from the database
-app.get('/', (req, res, next) => {
-    var context = {};
-    mysql.pool.query(getAllQuery,  (err, rows, fields) => {
-        if (err) {
-            console.log("there is an error with this GET")
-            return next(err); 
-        }
-        alert("This is the GET API")
-        // res.send(rows);
+// gets all the rows from the database and sends them to the client 
+app.get('/database', (req, res, next) => {
         getAllData(req, res, next);
-    });
-    context.row = rows;
-    res.render('./index', context)
 });
 
 // routes below:
@@ -89,7 +90,6 @@ app.post('/',  (req, res, next) => {
         getAllData(req, res, next);
     });
 });
-
 app.delete('/', (req, res, next) => {
     var context = {};
     var { name, reps, weight, unit, date } = req.body;

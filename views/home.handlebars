@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Database workout</title>
-       
+
     </head>
+
     <body>
 
         <h1>Please tell us about your workouts!</h1>
-       
+
         <!-- The form to fill -->
         <form method='POST' action='/' id='addForm'>
             <p>Name</p>
             <input type='text' name='name' id='nameId' required>
-            <p>reps</p>
-            <input type='number' name='reps'id='repsId'>
-            <p>weight</p>
-            <input type='number' name='weight' id='weightId'required>
+            <p>Reps</p>
+            <input type='number' name='reps' id='repsId'>
+            <p>Weight</p>
+            <input type='number' name='weight' id='weightId' required>
             <label for='kgs'>kgs
                 <input type='radio' name='unit' value='0' id='unit0'>
             </label>
             <label for='lbs'>lbs
-                <input type='radio' name='unit' value='1'id='unit1'>
+                <input type='radio' name='unit' value='1' id='unit1'>
             </label>
-            <input type='date' name='date'id='dateId' required>
+            <input type='date' name='date' id='dateId' required>
             <input id='addWorkout' type='submit' value='submit'>
         </form>
         <h1>Workout Table</h1>
-    <script src="script.js"></script>
-   
+        <script src="script.js"></script>
+
     </body>
+
 </html>
